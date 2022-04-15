@@ -1,81 +1,45 @@
 import numpy as np
 import os
 import gzip
+import random
+import pdb
 
-def load_data_file(inputfile, seq=True, onlytest=False):
+
+def load_data_file(inputfile):
     """
         Load data matrices from the specified folder.
     """
-    path = os.path.dirname(inputfile)
-    if len(path):
-        path = './'
-    data = dict()
-    if seq:
-        tmp = []
-        tmp.append(read_seq(inputfile))
-        seq_onehot, structure = read_structure(inputfile, path)
-        tmp.append(seq_onehot)
-        data["seq"] = tmp
-        data["structure"] = structure
-    if onlytest:
-        data["Y"] = []
-    else:
-        data["Y"] = load_label_seq(inputfile)
-
-    return data
-
-
-def get_RNA_seq_concolutional_array(seq, motif_len=10):
-    seq = seq.replace('U', 'T')
-    alpha = 'ACGT'
-    # for seq in seqs:
-    # for key, seq in seqs.iteritems():
-    half_len = motif_len / 2
-    row = (len(seq) + half_len * 2)
-    new_array = np.zeros((row, 4))
-    for i in range(half_len):
-        new_array[i] = np.array([0.25] * 4)
-
-    for i in range(row - half_len, row):
-        new_array[i] = np.array([0.25] * 4)
-
-    # pdb.set_trace()
-    for i, val in enumerate(seq):
-        i = i + motif_len - 1
-        if val not in 'ACGT':
-            new_array[i] = np.array([0.25] * 4)
-            continue
-        # if val == 'N' or i < motif_len or i > len(seq) - motif_len:
-        #    new_array[i] = np.array([0.25]*4)
-        # else:
-        try:
-            index = alpha.index(val)
-            new_array[i][index] = 1
-        except:
-            pdb.set_trace()
-        # data[key] = new_array
-    return new_array
+    seq_info = read_seq(inputfile)
+    return seq_info
 
 
 def read_seq(seq_file):
     seq_list = []
     seq = ''
-    with gzip.open(seq_file, 'r') as fp:
-        for line in fp:
+    with open(seq_file, 'r') as f:
+        for line in f:
             if line[0] == '>':
-                name = line[1:-1]
                 if len(seq):
-                    seq_array = get_RNA_seq_concolutional_array(seq)
+                    seq_array = seq
                     seq_list.append(seq_array)
                 seq = ''
             else:
                 seq = seq + line[:-1]
         if len(seq):
-            seq_array = get_RNA_seq_concolutional_array(seq)
+            seq_array = seq
             seq_list.append(seq_array)
 
     return np.array(seq_list)
 
+
+def read_class_name(seq_file):
+    cls_name_list = []
+    with open(seq_file, 'r') as f:
+        for line in f:
+            if line[0] == ">":
+                cls_name = line[-2]
+                cls_name_list.append(cls_name)
+    return cls_name_list
 
 
 def split_training_validation(classes, validation_size=0.2, shuffle=False):
@@ -119,3 +83,24 @@ def split_training_validation(classes, validation_size=0.2, shuffle=False):
     validation_label = np.array(validation_label)[validation_index]
 
     return training_indice, training_label, validation_indice, validation_label
+
+
+if __name__ == '__main__':
+    # unit test
+    # data_file = "/Users/yuxuan/Desktop/iDeepS-master/datasets/clip/10_PARCLIP_ELAVL1A_hg19/30000/training_sample_0/sequences.fa"
+    # data = load_data_file(data_file)
+    # cls_name = read_class_name(data_file)
+
+    # with open("data/egi_values.npy", 'rb') as f:
+    #     egi_val = np.load(f, allow_pickle=True)
+    # with open("data/seq_demo.npy", 'wb') as f:
+    #     np.save(f, data)
+    # with open("data/class_demo.npy", 'wb') as f:
+    #     np.save(f, cls_name)
+
+    with open("data/seq_demo.npy", 'rb') as f:
+        seq = np.load(f, allow_pickle=True)
+    with open("data/class_demo.npy", 'rb') as f:
+        cls_name = np.load(f, allow_pickle=True)
+    print(seq)
+    print(cls_name)
