@@ -52,11 +52,11 @@ def embed(sequence, instance_len, instance_stride):
     bag = np.stack(bag).astype(np.float64)
     return bag
 
+
 def one_hot_encode(seq):
     mapping = dict(zip("ACGTN", range(5)))
     seq2 = [mapping[i] for i in seq]
     return np.eye(5)[seq2]
-
 
 
 def create_bag(train_seq, valid_seq, instance_len=40, instance_stride=5):
@@ -87,10 +87,10 @@ def train_test_split(seq, cls_name, ratio=0.8):
     seq, cls_name = zip(*temp)
 
     train_seq = np.asarray(seq)[:train_num]
-    train_cls = np.asarray(cls_name)[:train_num]
+    train_cls = np.asarray(cls_name, dtype=float)[:train_num]
 
     val_seq = np.asarray(seq)[train_num:]
-    val_cls = np.asarray(cls_name)[train_num:]
+    val_cls = np.asarray(cls_name, dtype=float)[train_num:]
 
     return train_seq, val_seq, train_cls, val_cls
 
@@ -125,18 +125,24 @@ if __name__ == '__main__':
 
     train_bags, valid_bags = create_bag(train_seq, val_seq)
 
-    # with open("data/train_bags_demo.npy", 'wb') as f:
-    #     np.save(f, train_bags)
-    # with open("data/valid_bags_demo.npy", 'wb') as f:
-    #     np.save(f, valid_bags)
+    with open("data/train_bags_demo.npy", 'wb') as f:
+        np.save(f, train_bags)
+    with open("data/train_clsname_demo.npy", 'wb') as f:
+        np.save(f, train_cls)
+    with open("data/valid_bags_demo.npy", 'wb') as f:
+        np.save(f, valid_bags)
+    with open("data/valid_clsname_demo.npy", 'wb') as f:
+        np.save(f, val_cls)
 
     # with open("data/train_bags_demo.npy", 'rb') as f:
     #     train_bags = np.load(f, allow_pickle=True)
     # with open("data/valid_bags_demo.npy", 'rb') as f:
     #     valid_bags = np.load(f, allow_pickle=True)
-    #
+    valid_bags = np.load("data/valid_bags_demo.npy", allow_pickle=True)
+    train_bags = np.load("data/train_bags_demo.npy", allow_pickle=True)
+
     print(train_bags.shape)
     print(valid_bags.shape)
 
-    print(train_bags[0].shape) # 13 =(101-40)/5 = 12+1 , 40 instance length , # AGCTN # 4
-    print(train_bags[0][0]) # 13 =(101-40)/5 = 12+1 , 40 instance length , # AGCTN # 4
+    # print(train_bags[0].shape) # 13 =(101-40)/5 = 12+1 , 40 instance length , # AGCTN # 4
+    # print(train_bags[0][0]) # 13 =(101-40)/5 = 12+1 , 40 instance length , # AGCTN # 4
