@@ -42,47 +42,59 @@ def read_class_name(seq_file):
     return cls_name_list
 
 
-def split_training_validation(classes, validation_size=0.2, shuffle=False):
-    """split sampels based on balnace classes"""
-    num_samples = len(classes)
-    classes = np.array(classes)
-    classes_unique = np.unique(classes)
-    num_classes = len(classes_unique)
-    indices = np.arange(num_samples)
-    # indices_folds=np.zeros([num_samples],dtype=int)
-    training_indice = []
-    training_label = []
-    validation_indice = []
-    validation_label = []
-    for cl in classes_unique:
-        indices_cl = indices[classes == cl]
-        num_samples_cl = len(indices_cl)
+def embed(sequence, instance_len, instance_stride):
+    instance_num = int((len(sequence) - instance_len) / instance_stride) + 1
+    bag = []
+    for i in range(instance_num):
+        instance = sequence[i * instance_stride:i * instance_stride + instance_len]
+        bag.append(instance)
+    bag = np.stack(bag).astype(np.int32)
+    one_hot_bag = np.eye(4)[bag - 1].astype(np.float32)  ## let numerical denoted onehot to vector format
+    return one_hot_bag
 
-        # split this class into k parts
-        if shuffle:
-            random.shuffle(indices_cl)  # in-place shuffle
 
-        # module and residual
-        num_samples_each_split = int(num_samples_cl * validation_size)
-        res = num_samples_cl - num_samples_each_split
+def create_bag(train_seq, valid_seq, instance_len=40, instance_stride=5):
+    # length and strides could be simulated via cross validation
 
-        training_indice = training_indice + [val for val in indices_cl[num_samples_each_split:]]
-        training_label = training_label + [cl] * res
+    train_bags = []
+    for seq in train_seq:
+        ont_hot_bag = embed(seq, instance_len, instance_stride)
+        train_bags.append(ont_hot_bag)
 
-        validation_indice = validation_indice + [val for val in indices_cl[:num_samples_each_split]]
-        validation_label = validation_label + [cl] * num_samples_each_split
+    train_bags = np.asarray(train_bags)
 
-    training_index = np.arange(len(training_label))
-    random.shuffle(training_index)
-    training_indice = np.array(training_indice)[training_index]
-    training_label = np.array(training_label)[training_index]
+    valid_bags = []
+    for seq in valid_seq:
+        ont_hot_bag = embed(seq, instance_len, instance_stride)
+        valid_bags.append(ont_hot_bag)
 
-    validation_index = np.arange(len(validation_label))
-    random.shuffle(validation_index)
-    validation_indice = np.array(validation_indice)[validation_index]
-    validation_label = np.array(validation_label)[validation_index]
+    valid_bags = np.asarray(valid_bags)
 
-    return training_indice, training_label, validation_indice, validation_label
+    return train_bags, valid_bags
+
+
+def train_test_split(seq, cls_name, ratio=0.8):
+    assert len(seq) == len(cls_name)
+    train_num = int(len(seq) * ratio)
+    temp = list(zip(seq, cls_name))
+    random.shuffle(temp)
+    seq, cls_name = zip(*temp)
+
+    train_seq = np.asarray(seq)[:train_num]
+    train_cls = np.asarray(cls_name)[:train_num]
+
+    val_seq = np.asarray(seq)[train_num:]
+    val_cls = np.asarray(cls_name)[train_num:]
+
+    return train_seq, val_seq, train_cls, val_cls
+
+
+def str2token(seq):
+    seq_dict = {'A': "0", 'C': "1", 'G': "2", 'T': "3", 'N': "4"}
+    token = ""
+    for i in seq:
+        token += seq_dict[i]
+    return token
 
 
 if __name__ == '__main__':
@@ -102,5 +114,14 @@ if __name__ == '__main__':
         seq = np.load(f, allow_pickle=True)
     with open("data/class_demo.npy", 'rb') as f:
         cls_name = np.load(f, allow_pickle=True)
-    print(seq)
-    print(cls_name)
+
+    seq = [str2token(i) for i in seq]
+
+    train_seq, val_seq, train_cls, val_cls = train_test_split(seq, cls_name)
+
+    # print(train_seq)
+    # print(val_seq)
+    #
+    train_bags, valid_bags = create_bag(train_seq, val_seq)
+    print(train_bags)
+    print(valid_bags)
