@@ -46,12 +46,12 @@ valid_loader = torch.utils.data.DataLoader(valid_data, batch_size=batch_size, sh
 print(len(train_loader))
 print(len(valid_loader))
 
-# for data in train_loader:
-#     x, y = data
-#     print(x)
-#     print(y)
-#     print(x.shape, y.shape)
-#     break
+for data in train_loader:
+    x, y = data
+    print(x)
+    print(y)
+    print(x.shape, y.shape)
+    break
 # for data in valid_loader:
 #     x, y = data
 #     print(x)

@@ -54,9 +54,9 @@ def embed(sequence, instance_len, instance_stride):
 
 
 def one_hot_encode(seq):
-    mapping = dict(zip("ACGTN", range(5)))
-    seq2 = [mapping[i] for i in seq]
-    return np.eye(5)[seq2]
+    mapping = dict(zip("ACGT", range(4)))
+    seq2 = [mapping[i] for i in seq ]
+    return np.eye(4)[seq2]
 
 
 def create_bag(train_seq, valid_seq, instance_len=40, instance_stride=5):
@@ -114,35 +114,31 @@ if __name__ == '__main__':
     # with open("data/class_demo.npy", 'wb') as f:
     #     np.save(f, cls_name)
 
-    with open("data/seq_demo.npy", 'rb') as f:
-        seq = np.load(f, allow_pickle=True)
-    with open("data/class_demo.npy", 'rb') as f:
-        cls_name = np.load(f, allow_pickle=True)
+    # print(one_hot_encode("AGCTCCTTCT"))
+    #
+    # seq = np.load("data/seq_demo.npy")
+    # cls_name = np.load("data/class_demo.npy")
 
     # seq = [str2token(i) for i in seq]
 
-    train_seq, val_seq, train_cls, val_cls = train_test_split(seq, cls_name)
+    # train_seq, val_seq, train_cls, val_cls = train_test_split(seq, cls_name)
+    #
+    # train_bags, valid_bags = create_bag(train_seq, val_seq)
 
-    train_bags, valid_bags = create_bag(train_seq, val_seq)
+    # with open("data/train_bags_demo.npy", 'wb') as f:
+    #     np.save(f, train_bags)
+    # with open("data/train_clsname_demo.npy", 'wb') as f:
+    #     np.save(f, train_cls)
+    # with open("data/valid_bags_demo.npy", 'wb') as f:
+    #     np.save(f, valid_bags)
+    # with open("data/valid_clsname_demo.npy", 'wb') as f:
+    #     np.save(f, val_cls)
 
-    with open("data/train_bags_demo.npy", 'wb') as f:
-        np.save(f, train_bags)
-    with open("data/train_clsname_demo.npy", 'wb') as f:
-        np.save(f, train_cls)
-    with open("data/valid_bags_demo.npy", 'wb') as f:
-        np.save(f, valid_bags)
-    with open("data/valid_clsname_demo.npy", 'wb') as f:
-        np.save(f, val_cls)
-
-    # with open("data/train_bags_demo.npy", 'rb') as f:
-    #     train_bags = np.load(f, allow_pickle=True)
-    # with open("data/valid_bags_demo.npy", 'rb') as f:
-    #     valid_bags = np.load(f, allow_pickle=True)
     valid_bags = np.load("data/valid_bags_demo.npy", allow_pickle=True)
     train_bags = np.load("data/train_bags_demo.npy", allow_pickle=True)
-
-    print(train_bags.shape)
-    print(valid_bags.shape)
+    #
+    # print(train_bags.shape)
+    # print(valid_bags.shape)
 
     # print(train_bags[0].shape) # 13 =(101-40)/5 = 12+1 , 40 instance length , # AGCTN # 4
     # print(train_bags[0][0]) # 13 =(101-40)/5 = 12+1 , 40 instance length , # AGCTN # 4
