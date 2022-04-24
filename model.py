@@ -60,7 +60,13 @@ from torchsummaryX import summary
 #         bag_probability = self.cls(bag_features)
 #
 #         return bag_probability, gated_attention
+
+
 class WeakRM(nn.Module):
+    """
+    used for channel = 4, AGCT
+    """
+
     def __init__(self, training=True):
         super().__init__()
 
@@ -101,7 +107,7 @@ class WeakRM(nn.Module):
     def forward(self, inputs, training=True, mask=None):
         inputs = torch.squeeze(inputs, 0)
         print(inputs.shape)
-        inputs = inputs.permute((0, 2, 1))
+        inputs = inputs.permute((0, 2, 1))  # torch.Size([13, 5, 40])
         print(inputs.shape)
         inst_conv1 = self.inst_conv1(inputs)  # torch.Size([13, 32, 20])
         print(inst_conv1.shape)
@@ -136,87 +142,97 @@ class WeakRM(nn.Module):
         return bag_probability, gated_attention
 
 
-class WeakRMLSTM(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(13, 16, kernel_size=(1, 15), padding=(0, 7)),
-            nn.ReLU()
-        )
-
-        self.pool1 = nn.MaxPool2d((1, 2))
-
-        self.lstm = nn.LSTM(input_size=16, hidden_size=16, bidirectional=True, batch_first=True)
-
-        self.attention_v = nn.Sequential(
-            nn.Linear(32, 128),
-            nn.Tanh()
-        )
-
-        self.attention_u = nn.Sequential(
-            nn.Linear(32, 128),
-            nn.Sigmoid()
-        )
-
-        self.attention_weights = nn.Sequential(
-            nn.Linear(128, 1),
-            nn.Softmax()
-        )
-
-        self.cls = nn.Sequential(
-            nn.Linear(32, 1),
-            nn.Sigmoid()
-        )
-
-    def forward(self, inputs, training=True, mask=None):
-        # inputs = torch.squeeze(inputs, 0)
-        input_bag = inputs  # torch.Size([1, 13, 40, 5])
-        inst_conv1 = self.conv1(input_bag)  # torch.Size([1, 16, 40, 5])
-        print(inst_conv1.shape)
-        inst_pool1 = self.pool1(inst_conv1)  # torch.Size([1, 16, 40, 5])
-        inst_pool1 = torch.squeeze(inst_pool1, 0)  # torch.Size([16, 40, 2])
-        print(inst_pool1.shape)
-
-        embedding = self.lstm(inst_pool1)  # torch.Size([13, 16, 32])
-        print(embedding.shape)
-
-        attention_v = self.attention_v(embedding)
-        attention_u = self.attention_v(embedding)
-
-        # print(attention_u.shape, attention_v.shape)
-        gated_attention = self.attention_weights(attention_u * attention_v).permute((1, 0))
-
-        gated_attention = nn.Softmax()(gated_attention)  # torch.Size([1, 13])
-
-        bag_features = torch.matmul(gated_attention, embedding)
-        # print(embedding.shape, gated_attention.shape)
-        bag_probability = self.cls(bag_features)
-
-        return bag_probability, gated_attention
+# class WeakRMLSTM(nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#
+#         self.conv1 = nn.Sequential(
+#             nn.Conv2d(5, 16, kernel_size=(1, 15), padding=(0, 7)),
+#             nn.ReLU()
+#         )
+#
+#         self.pool1 = nn.MaxPool2d((2, 1))
+#
+#         self.lstm = nn.LSTM(input_size=16, hidden_size=16, bidirectional=True, batch_first=True)
+#
+#         self.attention_v = nn.Sequential(
+#             nn.Linear(32, 128),
+#             nn.Tanh()
+#         )
+#
+#         self.attention_u = nn.Sequential(
+#             nn.Linear(32, 128),
+#             nn.Sigmoid()
+#         )
+#
+#         self.attention_weights = nn.Sequential(
+#             nn.Linear(128, 1),
+#             nn.Softmax()
+#         )
+#
+#         self.cls = nn.Sequential(
+#             nn.Linear(32, 1),
+#             nn.Sigmoid()
+#         )
+#
+#     def forward(self, inputs, training=True, mask=None):
+#         print(inputs.shape)  # torch.Size([1, 13, 40, 5])
+#         inputs = inputs.permute((0, 3, 2, 1))  # torch.Size([1, 5, 40, 13])
+#         input_bag = inputs  # torch.Size([1, 5, 40, 13])
+#         print(input_bag.shape)
+#
+#         inst_conv1 = self.conv1(input_bag)  # torch.Size([1, 16, 40, 13])
+#         print(inst_conv1.shape)  # torch.Size([1, 16, 40, 13])
+#
+#         inst_pool1 = self.pool1(inst_conv1)  # torch.Size([1, 16, 20, 13])
+#         print("After the max pooling", inst_pool1.shape)
+#
+#         inst_pool1 = torch.squeeze(inst_pool1, 0)  # torch.Size([16, 20, 13])
+#         print(inst_pool1.shape)
+#
+#         inst_pool1 = inst_pool1.permute((2, 1, 0))
+#         print(inst_pool1.shape)
+#
+#         embedding = self.lstm(inst_pool1)  # torch.Size([13, 16, 32])
+#         print(embedding[0].shape)
+#         print(embedding[1].shape)
+#
+#         attention_v = self.attention_v(embedding)
+#         attention_u = self.attention_v(embedding)
+#
+#         # print(attention_u.shape, attention_v.shape)
+#         gated_attention = self.attention_weights(attention_u * attention_v).permute((1, 0))
+#
+#         gated_attention = nn.Softmax()(gated_attention)  # torch.Size([1, 13])
+#
+#         bag_features = torch.matmul(gated_attention, embedding)
+#         # print(embedding.shape, gated_attention.shape)
+#         bag_probability = self.cls(bag_features)
+#
+#         return bag_probability, gated_attention
 
 
 class WSCNN(nn.Module):
 
-    def __init__(self, instance_len=40, merging='MAX', ):
+    def __init__(self, instance_len=40, merging='MAX', training=True):
         super(WSCNN, self).__init__()
 
         assert merging in ['MAX', 'AVG']
 
         self.conv1 = nn.Sequential(
-            nn.Conv2d(13, 16, kernel_size=(1, 15), padding=(0, 7)),
+            nn.Conv2d(5, 16, kernel_size=(1, 15), padding=(0, 7)),
             nn.ReLU()
         )
         self.conv2 = nn.Sequential(
-            nn.Conv2d(16, 32, kernel_size=(1, 1), padding=(0, 7)),
+            nn.Conv2d(16, 32, kernel_size=(1, 1)),
             nn.ReLU()
         )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(16, 32, kernel_size=(1, 1), padding=(0, 7)),
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(32, 1, kernel_size=(1, 1)),
             nn.ReLU()
         )
         self.dropout = nn.Dropout(0.5)
-        self.pool1 = nn.MaxPool2d((1, instance_len))
+        self.pool1 = nn.MaxPool2d((instance_len, 1))
 
         if merging == 'MAX':
             self.pool2 = nn.AdaptiveMaxPool2d((1, 1))
@@ -226,21 +242,26 @@ class WSCNN(nn.Module):
             # self.pool2 = nn.GlobalAveragePooling2d()
 
     def forward(self, inputs, training=True, mask=None):
+        print(inputs.shape)
+        inputs = inputs.permute((0, 3, 2, 1))
         x = self.conv1(inputs)
         print(x.shape)
         x = self.pool1(x)
-        x = self.conv2(x)
         print(x.shape)
+        x = self.conv2(x)
+        print("After cov2d", x.shape)
         if training:
-            x = self.dropout(x, training=training)
+            x = self.dropout(x)
         x = self.conv3(x)
+        print(x.shape)
         out = self.pool2(x)
+        print(out.shape)
         return out
 
 
 if __name__ == '__main__':
-    x = torch.rand((1, 13, 40, 4))
-    encoder = WeakRM()
+    x = torch.rand((1, 13, 40, 5))
+    # encoder = WeakRM()
     # encoder = WeakRMLSTM()
-    # encoder = WSCNN()
+    encoder = WSCNN()
     summary(encoder, x)
