@@ -73,3 +73,9 @@ The peak regions should contain the RNA modification signal, and are considered 
 **only the non-peak regions of peak- carrying genes** were used as the ‘negative’ regions to exclude false negatives due to condition-specific gene expression. 
 
 The obtained ‘negative’ regions were randomly cropped to balance the length and number between regions.
+
+
+
+## Poster
+
+We will hold a mandatory poster session on the last day of class, April 27, in which each team will present the work they have done to the instructors, TAs and students in the class. This serves as a good opportunity for you to obtain feedback on your work and results in order to improve your final project report (see below). Thus, while we will not be grading the posters, the more you can present in terms of work and result the more likely it is that we can provide constructive feedback which will help you further improve your final writeup. Because of the time, each team will have at most eight minutes to present and answer questions.
