@@ -19,6 +19,18 @@ In genomics, weakly supervised learning, especially multi-instance learning (MIL
 
 
 
+# Multi-instance learning
+
+- A transformation of instances to a low-dimensional embedding
+- A permutation-invariant (symmetric) aggregation function
+- A final transformation to the bag probability
+
+
+
+
+
+
+
 # Model explanation
 
 ==How to obtain bag level probabilities from the instance level features without instance level labels==
@@ -35,6 +47,7 @@ In genomics, weakly supervised learning, especially multi-instance learning (MIL
 - A feature merging approach
 - Use a three layer neural network to learn weights $a_k$ of the low dimensional representation of each instance and obtains the bag level embedding according to the equation $Z=\sum_{k=1}^{K}a_kh_k$ where h is a bag of K instance feature 
 - A tanh and sigmoid to learn the nonlinearity information 
+- Softmax to identify the significant features
 - A fully connected layer then takes the element-wise multiplication of two non-linearizes and return the gated attention weights for each instance, where the parameters could be learnable
 
 

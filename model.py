@@ -67,8 +67,9 @@ class WeakRM(nn.Module):
     used for channel = 4, AGCT
     """
 
-    def __init__(self, training=True):
+    def __init__(self):
         super().__init__()
+        self.inst_length = 40
 
         self.inst_conv1 = nn.Sequential(
             nn.Conv1d(4, 32, kernel_size=15, padding=7, stride=1),
@@ -142,6 +143,87 @@ class WeakRM(nn.Module):
         return bag_probability, gated_attention
 
 
+# class WeakRM(nn.Module):
+#     """
+#     used for channel = 4, AGCT
+#     """
+#
+#     def __init__(self, training=True):
+#         super().__init__()
+#
+#         self.inst_conv1 = nn.Sequential(
+#             nn.Conv1d(4, 32, kernel_size=15, padding=7, stride=1),
+#             nn.ReLU(),
+#             nn.MaxPool1d(2),
+#         )
+#
+#         self.inst_conv2 = nn.Sequential(
+#             nn.Conv1d(32, 16, kernel_size=5, padding=2, stride=1),
+#             nn.ReLU()
+#         )
+#
+#         self.dropout = nn.Dropout(0.2)
+#
+#         self.attention_v = nn.Sequential(
+#             nn.Linear(160, 128),
+#             nn.Tanh()
+#         )
+#
+#         self.attention_u = nn.Sequential(
+#             nn.Linear(160, 128),
+#             nn.Sigmoid()
+#         )
+#
+#         self.attention_weights = nn.Sequential(
+#             nn.Linear(128, 1),
+#             nn.Softmax()
+#         )
+#
+#         self.cls = nn.Sequential(
+#             nn.Linear(160, 1),
+#             nn.Sigmoid()
+#         )
+#         self.softmax = nn.Softmax()
+#
+#     def forward(self, inputs, training=True, mask=None):
+#         inputs = torch.squeeze(inputs, 0)
+#         print("input shape",inputs.shape) # torch.Size([17, 20, 4])
+#         inputs = inputs.permute((0, 2, 1))  # torch.Size([13, 5, 40])
+#         print(inputs.shape)
+#         inst_conv1 = self.inst_conv1(inputs)  # torch.Size([13, 32, 20])
+#         print(inst_conv1.shape)
+#         if training:
+#             inst_conv1 = self.dropout(inst_conv1)
+#
+#         inst_conv2 = self.inst_conv2(inst_conv1)
+#         print(inst_conv2.shape)
+#
+#         inst_features = nn.Flatten()(inst_conv2)
+#         print(inst_features.shape)  # torch.Size([13, 320])
+#
+#         print("success here")
+#         attention_v = self.attention_v(inst_features)
+#         attention_u = self.attention_v(inst_features)
+#
+#         print(attention_u.shape)
+#         print(attention_v.shape)
+#
+#         # print(attention_u.shape, attention_v.shape)
+#         gated_attention = self.attention_weights(attention_u * attention_v).permute((1, 0))
+#         print(gated_attention.shape)
+#
+#         gated_attention = self.softmax(gated_attention)  # torch.Size([1, 13])
+#         print("gated attention shape", gated_attention.shape)
+#         print("inst features shape", inst_features.shape)
+#
+#         bag_features = torch.matmul(gated_attention, inst_features)
+#         print(bag_features.shape)
+#
+#         bag_probability = self.cls(bag_features)
+#
+#         return bag_probability, gated_attention
+
+
 class WeakRMLSTM(nn.Module):
     def __init__(self):
         super().__init__()
@@ -201,7 +283,8 @@ class WeakRMLSTM(nn.Module):
         attention_u = self.attention_v(embedding)
 
         # print(attention_u.shape, attention_v.shape)
-        gated_attention = self.attention_weights(attention_u * attention_v).permute((1, 0))
+        gated_attention = self.attention_weights(attention_u * attention_v)
+        gated_attention = gated_attention.permute(1, 0)
 
         gated_attention = nn.Softmax()(gated_attention)  # torch.Size([1, 13])
 
@@ -259,9 +342,24 @@ class WSCNN(nn.Module):
         return out
 
 
+class Baseline(nn.Module):
+    def __init__(self):
+        self.conv1 = nn.Sequential(
+            nn.Conv1d(5, 16, kernel_size=10),
+
+        )
+
+    def forward(self):
+        pass
+
+
 if __name__ == '__main__':
     x = torch.rand((1, 13, 40, 4))
+    # x = torch.rand((1, 17, 20, 4))
     encoder = WeakRM()
-    # encoder = WeakRMLSTM()
-    # encoder = WSCNN()
+    # # encoder = WeakRMLSTM()
+    # # encoder = WSCNN()
+    # summary(encoder, x)
+    # x = torch.rand(1, 101, 5)
+    # encoder = Baseline()
     summary(encoder, x)
