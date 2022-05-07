@@ -1,13 +1,14 @@
 02710_proj
 
 # TODO
-- modify the one hot encoding, excluding the N symbol in the sequence (AGCT four characters)
-- Build the model for classification (embedding part)
-- Find the reason for fluctuation
 - Find baseline model (WSCNN model performance, for now a bug here)
-- Attention plots => 
-
-
+- Attention plots => (identify the different significance level)\
+- test Max Pooling, average pooling 
+- test the performance with lstm layer
+- fixed the parameter used in training (opt = tf.keras.optimizers.Adam(lr=5e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-8, decay=1e-5))
+- lr = 1e-4, lr_decay = 1e-5
+- instance length = 50
+- instance stride = 10
 
 
 
