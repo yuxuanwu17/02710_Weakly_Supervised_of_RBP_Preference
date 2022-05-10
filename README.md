@@ -1,38 +1,46 @@
-02710_proj
+# Weakly supervised learning of RNA-protein binding preference prediction
 
-# TODO
-- Find baseline model (WSCNN model performance, for now a bug here)
-- Attention plots => (identify the different significance level)\
-- test Max Pooling, average pooling 
-- test the performance with lstm layer
-- fixed the parameter used in training (opt = tf.keras.optimizers.Adam(lr=5e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-8, decay=1e-5))
-- lr = 1e-4, lr_decay = 1e-5
-- instance length = 50
-- instance stride = 10
+## required library
 
+- RNAfold
+- Forgi
+- PyTorch
+- scikit-learn
+- Numpy
+- Pandas
 
-
+## organized_to_submit directory
 
 
-# Idea 
+### deep learning model file
+
+- main.ipynb
+- model.py
+- dataloader.py
+
+### RNA secondary structure
+
+- rnaCovert.py
+- RNA_structure_generation.py
+
+### Dataset
+
+- dataset can be found here: https://github.com/xypan1232/iDeepS/tree/master/datasets/clip
+
+
+## Idea 
 
 In genomics, weakly supervised learning, especially multi-instance learning (MIL), has been intensively applied for studying protein–DNA interaction (Gao and Ruan, 2015, 2017; Zhang et al., 2019, 2020), with the basic assumption that `the sequences captured by CLIP (or ChIP-seq) technologies contain both the interacting and non-interacting elements with the proteins`. We know only the label of the entire sequence, but it is not exactly clear which part of the sequence plays the key role, and a significant proportion of it may not contribute to the binding between DNA and protein at all. 
 
 
 
-# Multi-instance learning
+## Multi-instance learning
 
 - A transformation of instances to a low-dimensional embedding
 - A permutation-invariant (symmetric) aggregation function
 - A final transformation to the bag probability
 
-
-
-
-
-
-
-# Model explanation
+## Model explanation
 
 ==How to obtain bag level probabilities from the instance level features without instance level labels==
 
@@ -50,7 +58,6 @@ In genomics, weakly supervised learning, especially multi-instance learning (MIL
 - A tanh and sigmoid to learn the nonlinearity information 
 - Softmax to identify the significant features
 - A fully connected layer then takes the element-wise multiplication of two non-linearizes and return the gated attention weights for each instance, where the parameters could be learnable
-
 
 
 Attention would measure the degree of similarity among instances and thus is a suitable for our context-dependent data.

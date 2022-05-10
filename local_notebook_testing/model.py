@@ -93,7 +93,6 @@ class TimeDistributed(nn.Module):
         self.batch_first = batch_first
 
     def forward(self, x):
-
         if len(x.size()) <= 2:
             return self.module(x)
 
@@ -197,7 +196,7 @@ class WSCNN(nn.Module):
         assert merging in ['MAX', 'AVG']
 
         self.conv1 = nn.Sequential(
-            nn.Conv2d(5, 16, kernel_size=(1, 15), padding=(0, 7)),
+            nn.Conv2d(4, 16, kernel_size=(1, 15), padding=(0, 7)),
             nn.ReLU()
         )
         self.conv2 = nn.Sequential(
@@ -236,12 +235,38 @@ class WSCNN(nn.Module):
         return out
 
 
+class BaseLine(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv1d(in_channels=4, out_channels=1, kernel_size=10),
+            nn.ReLU(),
+            nn.MaxPool1d(3)
+        )
+        self.lstm = nn.LSTM(input_size=30, hidden_size=64, bidirectional=True, batch_first=True)
+        self.cls = nn.Sequential(
+            nn.Linear(128, 2),
+            nn.Sigmoid()
+        )
+
+    def forward(self, inputs):
+        inputs = inputs.permute(0, 2, 1)
+        x = self.conv1(inputs)
+        # x = torch.squeeze(x)
+        x, _ = self.lstm(x)
+        x = self.cls(x)
+        return x[0]
+
+
+
 if __name__ == '__main__':
-    x = torch.rand((1, 13, 40, 4))
+    # x = torch.rand((1, 13, 40, 4))
+    x = torch.rand((1,101, 4))
     # x = torch.rand((1, 17, 20, 4))
     # encoder = WeakRM()
-    encoder = WeakRMLSTM()
-    # # encoder = WSCNN()
+    # encoder = WeakRMLSTM()
+    # encoder = WSCNN()
+    encoder = BaseLine()
     # summary(encoder, x)
     # x = torch.rand(1, 101, 5)
     # encoder = Baseline()

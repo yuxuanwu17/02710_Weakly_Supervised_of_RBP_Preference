@@ -1,14 +1,10 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.utils.rnn as rnn_utils
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 import torch.optim as optim
-from torch.optim import lr_scheduler
-import torch.nn.utils as utils
 from tqdm import tqdm
-from model import WeakRM
+from notebook.model import WeakRM
 
 
 class LibriSamples(torch.utils.data.Dataset):
@@ -28,10 +24,10 @@ class LibriSamples(torch.utils.data.Dataset):
         return x, y
 
 
-train_data_path = "data/train_bags_demo.npy"
-train_cls_path = "data/train_clsname_demo.npy"
-valid_data_path = "data/valid_bags_demo.npy"
-valid_cls_path = "data/valid_clsname_demo.npy"
+train_data_path = "../data/train_bags_demo.npy"
+train_cls_path = "../data/train_clsname_demo.npy"
+valid_data_path = "../data/valid_bags_demo.npy"
+valid_cls_path = "../data/valid_clsname_demo.npy"
 
 batch_size = 1
 # print(len(np.load(train_cls_path)))
