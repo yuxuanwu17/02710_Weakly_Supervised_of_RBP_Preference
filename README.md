@@ -1,4 +1,4 @@
-# Weakly supervised learning of RNA-protein binding preference prediction
+# WeakRBP: Weakly supervised learning of RNA-protein binding preference prediction
 
 ## required library
 
