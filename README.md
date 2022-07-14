@@ -45,7 +45,7 @@ In genomics, weakly supervised learning, especially multi-instance learning (MIL
 
 ## Model explanation
 
-==How to obtain bag level probabilities from the instance level features without instance level labels==
+How to obtain bag level probabilities from the instance level features without instance level labels
 
 - MAX: extract information only concerning the most favored instance (overlooks other valuable instances, suffer from the outliers) `MaxPooling`
 - Average pooling: assign equal weights to all the instances, ignoring the fact that instances are sparsely distributed. `Average pooling`
