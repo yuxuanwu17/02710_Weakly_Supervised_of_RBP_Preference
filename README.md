@@ -27,6 +27,9 @@
 
 - dataset can be found here: https://github.com/xypan1232/iDeepS/tree/master/datasets/clip
 
+### Model
+![model_sketch](https://cdn.jsdelivr.net/gh/imgstore/typora/20220714144814.png)
+
 
 ## Idea 
 
